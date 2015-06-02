@@ -268,7 +268,6 @@ public class TestMGRS {
                 "",	  // empty value for MGRS String is invalid
                 "11",     // MGRS String parse error, string was entirely numeric
                 "999AA",  // MGRS String parse error, 3 digit number '999' is too large for UTM longitudinal zone
-                "1CD",    // MGRS String parse error, expecting 2 alpha characters for MGRS square, found only one, or end of string: D
                 "1C11",   // xSquare character was not a letter: 1
                 "1CD1",   // ySquare character was not a letter: 1
                 "31UIO",  // Invalid MGRS easting square identifier 'I' for longitudinal zone 31
@@ -437,6 +436,13 @@ public class TestMGRS {
         } catch (NotAnMGRSBoxException e) {
             // expected
         }
+    }
+
+    @Test
+    public void testGridZoneOnly() {
+        MGRS mgrs = new MGRS("4Q");
+        Assert.assertNotNull(mgrs.getBoundingBox());
+        mgrs.toString();
     }
 
     /**

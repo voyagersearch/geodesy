@@ -249,9 +249,20 @@ public class MGRS implements GeoPoint, Serializable {
         // Note however, that this could be modified to accept UTM cells without MGRS square ids.
         if (mgrsBuf.length() - i < 2) {
             // MGRS square needed for poles, and we also choose to require it for UTM coordinates
-            throw new IllegalArgumentException("MGRS String parse error," +
-                    " expecting 2 alpha characters for MGRS square, found only one, or end of string: " +
-                    mgrsBuf.subSequence(i, mgrsBuf.length()));
+            if (utmCoord) {
+                precision = -1;
+                bbox = new Geodetic2DBounds(
+                  new Geodetic2DPoint(new Longitude(UTM.minLonDegrees(lonZone, latBand), Angle.DEGREES),
+                    new Latitude(UTM.minLatDegrees(latBand), Angle.DEGREES)),
+                  new Geodetic2DPoint(new Longitude(UTM.maxLonDegrees(lonZone, latBand), Angle.DEGREES),
+                    new Latitude(UTM.maxLatDegrees(latBand), Angle.DEGREES)));
+                return;
+            }
+            else {
+                throw new IllegalArgumentException("MGRS String parse error," +
+                  " expecting 2 alpha characters for MGRS square, found only one, or end of string: " +
+                  mgrsBuf.subSequence(i, mgrsBuf.length()));
+            }
         } else {
             // Set instance variables based on MGRS square identifiers, and validate syntax
             xSquare = mgrsBuf.charAt(i++);
@@ -803,6 +814,10 @@ public class MGRS implements GeoPoint, Serializable {
      */
     @Override
     public String toString() {
+        if (precision == -1) {
+            return String.valueOf(lonZone) + latBand;
+        }
+
         int precisionDigits = 5;
         if (precision == 100000) precisionDigits = 0;
         else if (precision == 10000) precisionDigits = 1;
